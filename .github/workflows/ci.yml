@@ -33,7 +33,6 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: pcov
           tools: composer:v2
-          ini-values: error_reporting=8191
 
       - name: Install dependencies
         run: |
@@ -48,7 +47,7 @@ jobs:
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
       - name: Run PHPStan
-        run: php -d error_reporting="E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" vendor/bin/phpstan analyse --no-progress --error-format=github
+        run: vendor/bin/phpstan analyse --no-progress --error-format=github
 
       - name: Run Pint
         run: vendor/bin/pint --test
