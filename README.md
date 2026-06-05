@@ -1,14 +1,19 @@
-# laravel-msegat
+<p align="center">
+    <a href="https://www.php.net/"><img src="https://img.shields.io/badge/php-^8.2-8892BF.svg?style=for-the-badge&logo=php" alt="PHP Version"></a>
+    <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-10|11|12-FF2D20.svg?style=for-the-badge&logo=laravel" alt="Laravel Version"></a>
+    <a href="https://msegat.com"><img src="https://img.shields.io/badge/Msegat-SMS_OTP_WhatsApp-00A859.svg?style=for-the-badge" alt="Msegat"></a>
+    <a href="https://github.com/aghfatehi/laravel-msegat/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="License"></a>
+    <a href="https://github.com/aghfatehi/laravel-msegat/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/aghfatehi/laravel-msegat/ci.yml?style=for-the-badge&label=CI&logo=github" alt="CI"></a>
+    <a href="https://packagist.org/packages/aghfatehi/laravel-msegat"><img src="https://img.shields.io/packagist/v/aghfatehi/laravel-msegat.svg?style=for-the-badge&logo=packagist" alt="Packagist"></a>
+    <a href="https://packagist.org/packages/aghfatehi/laravel-msegat"><img src="https://img.shields.io/packagist/dt/aghfatehi/laravel-msegat.svg?style=for-the-badge" alt="Downloads"></a>
+</p>
 
-> A professional Laravel package for integrating with [Msegat](https://msegat.com) SMS, OTP, and WhatsApp APIs.
+<h1 align="center">Laravel Msegat</h1>
+<h3 align="center">SMS, OTP, and WhatsApp integration for the Msegat gateway</h3>
 
-[![CI](https://github.com/aghfatehi/laravel-msegat/actions/workflows/ci.yml/badge.svg)](https://github.com/aghfatehi/laravel-msegat/actions/workflows/ci.yml)
-[![Latest Version](https://img.shields.io/packagist/v/aghfatehi/laravel-msegat.svg)](https://packagist.org/packages/aghfatehi/laravel-msegat)
-[![Total Downloads](https://img.shields.io/packagist/dt/aghfatehi/laravel-msegat.svg)](https://packagist.org/packages/aghfatehi/laravel-msegat)
-[![License](https://img.shields.io/packagist/l/aghfatehi/laravel-msegat.svg)](https://github.com/aghfatehi/laravel-msegat/blob/main/LICENSE)
-[![PHP Version](https://img.shields.io/packagist/php-v/aghfatehi/laravel-msegat)](https://packagist.org/packages/aghfatehi/laravel-msegat)
-
-Production-ready for SaaS, enterprise, and open-source projects. Supports Laravel 10, 11, and 12 with PHP 8.2+.
+<p align="center">
+    <strong>Production-ready for SaaS, enterprise, and open-source projects. Supports Laravel 10, 11, and 12 with PHP 8.2+.</strong>
+</p>
 
 ---
 
