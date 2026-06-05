@@ -7,7 +7,7 @@ parameters:
     reportUnmatchedIgnoredErrors: false
     parallel:
         maximumNumberOfProcesses: 1
-        processTimeout: 600
+        processTimeout: 600.0
     bootstrapFiles:
         - phpstan-bootstrap.php
     ignoreErrors:
