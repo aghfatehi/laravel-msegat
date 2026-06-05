@@ -9,7 +9,7 @@ class LogSmsListener
 {
     public function handle(MessageSent $event): void
     {
-        if (! config('msegat.logging.enabled')) {
+        if (!config('msegat.logging.enabled')) {
             return;
         }
 

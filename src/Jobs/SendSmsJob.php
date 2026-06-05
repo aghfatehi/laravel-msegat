@@ -31,11 +31,11 @@ class SendSmsJob implements ShouldQueue
 
         $response = $client->send($this->data);
 
-        $result = SmsResponse::fromApiResponse($response, ! empty($this->data['reqBulkId']));
+        $result = SmsResponse::fromApiResponse($response, !empty($this->data['reqBulkId']));
 
         MessageSent::dispatch($result);
 
-        if (! $result->successful) {
+        if (!$result->successful) {
             throw new \RuntimeException("SMS sending failed: {$result->message}");
         }
     }

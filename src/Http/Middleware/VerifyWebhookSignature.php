@@ -12,11 +12,11 @@ class VerifyWebhookSignature
     {
         $secret = config('msegat.webhook.secret');
 
-        if (! empty($secret)) {
+        if (!empty($secret)) {
             $signature = $request->header('X-Msegat-Signature');
             $timestamp = $request->header('X-Msegat-Timestamp');
 
-            if (! $signature || ! $timestamp) {
+            if (!$signature || !$timestamp) {
                 throw new WebhookSignatureException('Missing signature headers');
             }
 
@@ -28,7 +28,7 @@ class VerifyWebhookSignature
             $payload = $request->getContent();
             $expected = hash_hmac('sha256', $timestamp.'.'.$payload, $secret);
 
-            if (! hash_equals($expected, $signature)) {
+            if (!hash_equals($expected, $signature)) {
                 throw new WebhookSignatureException('Invalid webhook signature');
             }
         }

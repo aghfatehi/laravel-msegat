@@ -51,7 +51,7 @@ class MsegatServiceProvider extends ServiceProvider
 
     private function registerWebhookRoutes(): void
     {
-        if (! $this->app->routesAreCached()) {
+        if (!$this->app->routesAreCached()) {
             require __DIR__.'/Http/routes.php';
         }
     }

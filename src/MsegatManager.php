@@ -96,7 +96,7 @@ class MsegatManager
             $at = $at->format('Y-m-d H:i:s');
         }
 
-        if (! preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $at)) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $at)) {
             throw new ValidationException('Invalid datetime format. Use Y-m-d H:i:s.');
         }
 
@@ -277,7 +277,7 @@ class MsegatManager
         $data = [
             'number' => $number,
             'userSender' => $this->resolveSender(),
-            'lang' => $this->otpLanguage ?? config('msegat.otp.code_length') > 4 ? 'En' : 'Ar',
+            'lang' => $this->otpLanguage ?? 4 < config('msegat.otp.code_length') ? 'En' : 'Ar',
         ];
 
         $response = $this->getClient()->sendOtp($data);
@@ -411,7 +411,7 @@ class MsegatManager
 
     public function getClient(): MsegatClient
     {
-        if (! $this->client) {
+        if (!$this->client) {
             $this->client = new MsegatClient;
         }
 

@@ -88,7 +88,7 @@ class WebhookController extends Controller
         $signature = $request->header('X-Msegat-Signature');
         $timestamp = $request->header('X-Msegat-Timestamp');
 
-        if (! $signature || ! $timestamp) {
+        if (!$signature || !$timestamp) {
             abort(401, 'Missing signature headers');
         }
 
@@ -100,7 +100,7 @@ class WebhookController extends Controller
         $payload = $request->getContent();
         $expected = hash_hmac('sha256', $timestamp.'.'.$payload, $secret);
 
-        if (! hash_equals($expected, $signature)) {
+        if (!hash_equals($expected, $signature)) {
             abort(401, 'Invalid webhook signature');
         }
     }

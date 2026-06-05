@@ -132,7 +132,7 @@ class MsegatClient
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->config['http_client']['timeout']);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->config['http_client']['connect_timeout']);
 
-        if (! $this->config['verify_ssl']) {
+        if (!$this->config['verify_ssl']) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         }
