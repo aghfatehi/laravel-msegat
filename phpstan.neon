@@ -5,6 +5,10 @@ parameters:
     excludePaths:
         - src/Http/routes.php
     reportUnmatchedIgnoredErrors: false
+    parallel:
+        maximumNumberOfProcesses: 1
+    bootstrapFiles:
+        - phpstan-bootstrap.php
     ignoreErrors:
         - '/Call to an undefined method.*toMsegat/'
         - '/Call to an undefined method.*routesAreCached/'
