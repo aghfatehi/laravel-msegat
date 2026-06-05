@@ -12,3 +12,4 @@ rector.php
 coverage/
 .DS_Store
 Thumbs.db
+composer.lock

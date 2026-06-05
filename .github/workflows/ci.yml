@@ -36,7 +36,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "orchestra/testbench:^${{ matrix.laravel }}" --dev --no-interaction --no-update
+          composer require \
+            "illuminate/support:^${{ matrix.laravel }}" \
+            "illuminate/http:^${{ matrix.laravel }}" \
+            "illuminate/database:^${{ matrix.laravel }}" \
+            "illuminate/notifications:^${{ matrix.laravel }}" \
+            "illuminate/queue:^${{ matrix.laravel }}" \
+            "illuminate/events:^${{ matrix.laravel }}" \
+            --dev --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
       - name: Run PHPStan
