@@ -2,6 +2,11 @@
 
 namespace Aghfatehi\Msegat\Enums;
 
+/**
+ * Enumeration of all supported Msegat API endpoints.
+ *
+ * Each case maps to a logical operation and provides the actual API script path.
+ */
 enum ApiEndpoint: string
 {
     case Send = 'send';
@@ -26,6 +31,11 @@ enum ApiEndpoint: string
         'balance' => 'Credits.php',
     ];
 
+    /**
+     * Get the actual API script path for this endpoint.
+     *
+     * @return string Relative script path (e.g. 'sendsms.php').
+     */
     public function path(): string
     {
         return self::PATHS[$this->value];

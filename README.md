@@ -40,11 +40,14 @@ php artisan migrate
 
 ## Configuration
 
-Add to your `.env`:
+Add to your `.env` (required variables marked with **REQUIRED**):
 
 ```env
+# ─── REQUIRED ───────────────────────────────────────
 MSEGAT_USERNAME=your_username
 MSEGAT_API_KEY=your_api_key
+
+# ─── OPTIONAL ───────────────────────────────────────
 MSEGAT_SENDER=YourSender
 MSEGAT_BASE_URL=https://www.msegat.com/gw/
 MSEGAT_TIMEOUT=30
@@ -57,18 +60,18 @@ MSEGAT_WEBHOOK_SECRET=your_webhook_secret
 
 ### Config Options
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MSEGAT_USERNAME` | — | Msegat account username |
-| `MSEGAT_API_KEY` | — | Msegat API key |
-| `MSEGAT_SENDER` | `''` | Default sender name |
-| `MSEGAT_BASE_URL` | `https://www.msegat.com/gw/` | API base URL |
-| `MSEGAT_TIMEOUT` | `30` | HTTP request timeout (seconds) |
-| `MSEGAT_RETRIES` | `3` | Max retry attempts on failure |
-| `MSEGAT_VERIFY_SSL` | `true` | Verify SSL certificate |
-| `MSEGAT_QUEUE_ENABLED` | `false` | Enable async webhook processing |
-| `MSEGAT_LOGGING_ENABLED` | `true` | Enable request/response logging |
-| `MSEGAT_WEBHOOK_SECRET` | `''` | Secret for webhook signature verification |
+| Variable | Default | Required | Description |
+|----------|---------|----------|-------------|
+| `MSEGAT_USERNAME` | — | **Yes** | Msegat account username |
+| `MSEGAT_API_KEY` | — | **Yes** | Msegat API key |
+| `MSEGAT_SENDER` | `''` | No | Default sender name |
+| `MSEGAT_BASE_URL` | `https://www.msegat.com/gw/` | No | API base URL |
+| `MSEGAT_TIMEOUT` | `30` | No | HTTP request timeout (seconds) |
+| `MSEGAT_RETRIES` | `3` | No | Max retry attempts on failure |
+| `MSEGAT_VERIFY_SSL` | `true` | No | Verify SSL certificate |
+| `MSEGAT_QUEUE_ENABLED` | `false` | No | Enable async webhook processing |
+| `MSEGAT_LOGGING_ENABLED` | `true` | No | Enable request/response logging |
+| `MSEGAT_WEBHOOK_SECRET` | `''` | No | Secret for webhook signature verification |
 
 ---
 
@@ -336,7 +339,7 @@ The test suite includes:
 
 ---
 
-## Code Quality
+## Code Quality (For Contributors)
 
 ```bash
 # Laravel Pint (PSR-12)

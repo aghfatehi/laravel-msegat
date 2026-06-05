@@ -7,8 +7,20 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Controller that handles incoming Msegat webhooks.
+ *
+ * Provides endpoints for delivery reports, status updates,
+ * incoming messages, and failed message notifications.
+ */
 class WebhookController extends Controller
 {
+    /**
+     * Handle delivery report webhook.
+     *
+     * @param  Request  $request  The incoming webhook request.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deliveryReport(Request $request)
     {
         $this->verifySignature($request);
@@ -26,6 +38,12 @@ class WebhookController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Handle message status update webhook.
+     *
+     * @param  Request  $request  The incoming webhook request.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function status(Request $request)
     {
         $this->verifySignature($request);
@@ -43,6 +61,12 @@ class WebhookController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Handle incoming message webhook (replies from recipients).
+     *
+     * @param  Request  $request  The incoming webhook request.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function incoming(Request $request)
     {
         $this->verifySignature($request);
@@ -60,6 +84,12 @@ class WebhookController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Handle failed message webhook.
+     *
+     * @param  Request  $request  The incoming webhook request.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function failed(Request $request)
     {
         $this->verifySignature($request);
@@ -77,6 +107,14 @@ class WebhookController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Verify the HMAC signature on an incoming webhook request.
+     *
+     * Aborts with 401 if the signature is missing, expired, or invalid.
+     *
+     * @param  Request  $request  The incoming HTTP request.
+     * @return void
+     */
     private function verifySignature(Request $request): void
     {
         $secret = config('msegat.webhook.secret');

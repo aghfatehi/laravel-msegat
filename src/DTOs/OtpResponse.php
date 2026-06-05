@@ -2,8 +2,17 @@
 
 namespace Aghfatehi\Msegat\DTOs;
 
+/**
+ * Data transfer object representing the result of an OTP send/verify operation.
+ */
 readonly class OtpResponse
 {
+    /**
+     * @param  bool  $successful  Whether the operation succeeded.
+     * @param  string  $status  Result status: 'sent', 'verified', or 'failed'.
+     * @param  string|null  $otpId  OPTIONAL. The OTP identifier returned by the API.
+     * @param  array<string,mixed>  $raw  OPTIONAL. The raw API response for debugging.
+     */
     public function __construct(
         public bool $successful,
         public string $status,
@@ -12,6 +21,12 @@ readonly class OtpResponse
     ) {
     }
 
+    /**
+     * Create an OtpResponse from the API's JSON-decoded response array.
+     *
+     * @param  array<string,mixed>  $response  The raw API response.
+     * @return self
+     */
     public static function fromApiResponse(array $response): self
     {
         $code = $response['code'] ?? '';

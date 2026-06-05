@@ -9,6 +9,10 @@ use Aghfatehi\Msegat\MsegatManager;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * Laravel facade for the Msegat SMS manager.
+ *
+ * Provides a static interface to MsegatManager methods.
+ *
  * @method static MsegatManager sms()
  * @method static MsegatManager otp()
  * @method static MsegatManager whatsapp()
@@ -33,8 +37,16 @@ use Illuminate\Support\Facades\Facade;
  * @method static SmsResponse sendTestMessage()
  * @method static MsegatManager forBulkId(string $bulkId)
  */
+/**
+ * @see \Aghfatehi\Msegat\MsegatManager
+ */
 class Msegat extends Facade
 {
+    /**
+     * Get the registered name of the component.
+     *
+     * @return string
+     */
     protected static function getFacadeAccessor(): string
     {
         return 'msegat';

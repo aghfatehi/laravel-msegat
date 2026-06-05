@@ -6,8 +6,23 @@ use Aghfatehi\Msegat\Exceptions\WebhookSignatureException;
 use Closure;
 use Illuminate\Http\Request;
 
+/**
+ * Middleware that verifies Msegat webhook HMAC signatures.
+ *
+ * Validates the X-Msegat-Signature header against a SHA256 HMAC of
+ * the timestamp and request body using the configured webhook secret.
+ */
 class VerifyWebhookSignature
 {
+    /**
+     * Handle an incoming webhook request.
+     *
+     * @param  Request  $request  The incoming HTTP request.
+     * @param  Closure  $next  The next middleware handler.
+     * @return mixed
+     *
+     * @throws WebhookSignatureException If signature is missing, expired, or invalid.
+     */
     public function handle(Request $request, Closure $next)
     {
         $secret = config('msegat.webhook.secret');

@@ -2,8 +2,16 @@
 
 namespace Aghfatehi\Msegat\DTOs;
 
+/**
+ * Data transfer object representing an OTP send request.
+ */
 readonly class OtpRequest
 {
+    /**
+     * @param  string  $number  REQUIRED. The recipient phone number.
+     * @param  string  $sender  REQUIRED. Approved sender name.
+     * @param  string  $language  OPTIONAL. OTP language: 'Ar' (Arabic, default) or 'En' (English).
+     */
     public function __construct(
         public string $number,
         public string $sender,
@@ -11,6 +19,11 @@ readonly class OtpRequest
     ) {
     }
 
+    /**
+     * Convert the DTO to an array suitable for the Msegat OTP API.
+     *
+     * @return array<string,string>
+     */
     public function toArray(): array
     {
         return [

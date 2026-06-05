@@ -2,6 +2,11 @@
 
 namespace Aghfatehi\Msegat\Enums;
 
+/**
+ * Enumeration of Msegat API response codes with their human-readable messages.
+ *
+ * Use to programmatically interpret API responses.
+ */
 enum ResponseCode: string
 {
     case Success = '1';
@@ -31,11 +36,21 @@ enum ResponseCode: string
     case MethodNotAllowed = 'M0034';
     case NoSenders = 'M0036';
 
+    /**
+     * Determine if this code represents a successful API response.
+     *
+     * @return bool True if code is '1' or 'M0000'.
+     */
     public function isSuccess(): bool
     {
         return in_array($this, [self::Success, self::SuccessAlt], true);
     }
 
+    /**
+     * Get a human-readable description of this response code.
+     *
+     * @return string
+     */
     public function message(): string
     {
         return match ($this) {

@@ -2,6 +2,9 @@
 
 namespace Aghfatehi\Msegat\Enums;
 
+/**
+ * Enumeration of possible SMS message delivery statuses.
+ */
 enum MessageStatus: string
 {
     case Pending = 'pending';

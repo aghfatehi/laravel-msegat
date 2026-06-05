@@ -7,12 +7,23 @@ use Aghfatehi\Msegat\Exceptions\ApiException;
 use Aghfatehi\Msegat\Exceptions\MsegatException;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Low-level HTTP client for the Msegat REST API.
+ *
+ * Handles authentication, multipart form building, cURL execution,
+ * and JSON response parsing. All public methods map to Msegat API endpoints.
+ */
 class MsegatClient
 {
+    /** @var array{userName: string, apiKey: string} Msegat API credentials. */
     private array $credentials;
 
+    /** @var array<string,mixed> Full msegat config array. */
     private array $config;
 
+    /**
+     * @param  array<string,mixed>|null  $config  OPTIONAL. Config override for testing.
+     */
     public function __construct()
     {
         $config = config('msegat');
@@ -25,26 +36,57 @@ class MsegatClient
         $this->config = $config;
     }
 
+    /**
+     * Send a standard SMS message.
+     *
+     * @param  array<string,mixed>  $data  REQUIRED. Message payload (numbers, sender, msg, etc.).
+     * @return array The decoded JSON response from Msegat.
+     */
     public function send(array $data): array
     {
         return $this->request(ApiEndpoint::Send, $data);
     }
 
+    /**
+     * Send personalized (variable-based) SMS messages.
+     *
+     * @param  array<string,mixed>  $data  REQUIRED. Payload including 'vars' per recipient.
+     * @return array The decoded JSON response.
+     */
     public function sendPersonalized(array $data): array
     {
         return $this->request(ApiEndpoint::SendPersonalized, $data);
     }
 
+    /**
+     * Send an OTP code to a single number.
+     *
+     * @param  array<string,mixed>  $data  REQUIRED. Payload with 'number', 'userSender', 'lang'.
+     * @return array The decoded JSON response.
+     */
     public function sendOtp(array $data): array
     {
         return $this->request(ApiEndpoint::SendOtp, $data);
     }
 
+    /**
+     * Verify an OTP code.
+     *
+     * @param  array<string,mixed>  $data  REQUIRED. Payload with 'number', 'code', 'lang'.
+     * @return array The decoded JSON response.
+     */
     public function verifyOtp(array $data): array
     {
         return $this->request(ApiEndpoint::VerifyOtp, $data);
     }
 
+    /**
+     * Get account balance (SMS credits).
+     *
+     * @return string Raw response body (credit count or error code).
+     *
+     * @throws ApiException On known error codes.
+     */
     public function getBalance(): string
     {
         $payload = $this->buildMultipart(ApiEndpoint::Balance, []);
@@ -61,16 +103,33 @@ class MsegatClient
         return $body;
     }
 
+    /**
+     * Retrieve all registered sender names.
+     *
+     * @return array The decoded JSON response.
+     */
     public function getSenders(): array
     {
         return $this->request(ApiEndpoint::GetSenders, []);
     }
 
+    /**
+     * Get delivery reports / message statuses.
+     *
+     * @param  array<string,mixed>  $filters  REQUIRED. At minimum 'reqBulkId', optionally 'pageNumber', 'limit'.
+     * @return array The decoded JSON response.
+     */
     public function getMessages(array $filters): array
     {
         return $this->request(ApiEndpoint::GetMessages, $filters);
     }
 
+    /**
+     * Calculate the cost of a message before sending.
+     *
+     * @param  array<string,mixed>  $data  REQUIRED. Payload with contacts, msg, etc.
+     * @return string Raw response body (cost string).
+     */
     public function calculateCost(array $data): string
     {
         $payload = $this->buildMultipart(ApiEndpoint::CalculateCost, $data);
@@ -81,6 +140,15 @@ class MsegatClient
         );
     }
 
+    /**
+     * Execute an API request that returns JSON.
+     *
+     * @param  ApiEndpoint  $endpoint  The API endpoint to call.
+     * @param  array<string,mixed>  $data  The request payload.
+     * @return array The decoded JSON response.
+     *
+     * @throws MsegatException On invalid JSON response.
+     */
     private function request(ApiEndpoint $endpoint, array $data): array
     {
         $url = $this->config['base_url'].$endpoint->path();
@@ -98,6 +166,13 @@ class MsegatClient
         return $decoded;
     }
 
+    /**
+     * Build a Guzzle-style multipart payload array with credentials merged in.
+     *
+     * @param  ApiEndpoint  $endpoint  The target endpoint (unused in payload, kept for extensibility).
+     * @param  array<string,mixed>  $data  The request data fields.
+     * @return array<int, array{name: string, contents: string}> Multipart array.
+     */
     private function buildMultipart(ApiEndpoint $endpoint, array $data): array
     {
         $payload = [];
@@ -122,6 +197,15 @@ class MsegatClient
         return $payload;
     }
 
+    /**
+     * Execute a POST request via cURL.
+     *
+     * @param  string  $url  The full API URL.
+     * @param  array<int, array{name: string, contents: string}>  $multipartData  Multipart form data.
+     * @return string Raw response body.
+     *
+     * @throws MsegatException On cURL errors.
+     */
     private function curlPost(string $url, array $multipartData): string
     {
         $ch = curl_init();
@@ -158,6 +242,14 @@ class MsegatClient
         return $response;
     }
 
+    /**
+     * Log an API request if logging is enabled in config.
+     *
+     * @param  string  $method  HTTP method (e.g. POST).
+     * @param  string  $path  The request URL path.
+     * @param  int  $status  HTTP status code.
+     * @return void
+     */
     private function logRequest(string $method, string $path, int $status): void
     {
         if ($this->config['logging']['enabled'] ?? false) {

@@ -1,5 +1,16 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| Msegat Webhook Routes
+|--------------------------------------------------------------------------
+|
+| These routes handle incoming callbacks from Msegat for delivery reports,
+| message status updates, incoming replies, and failed message alerts.
+| All routes are prefixed with 'webhook/msegat'.
+|
+*/
+
 use Aghfatehi\Msegat\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
