@@ -33,6 +33,7 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: pcov
           tools: composer:v2
+          ini-values: error_reporting=8191
 
       - name: Install dependencies
         run: |
