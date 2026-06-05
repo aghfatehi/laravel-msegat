@@ -1,0 +1,9 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "simplified_if_return": true,
+        "phpdoc_align": false,
+        "phpdoc_separation": false,
+        "single_line_empty_body": false
+    }
+}

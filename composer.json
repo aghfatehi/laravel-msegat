@@ -1,0 +1,67 @@
+{
+    "name": "aghfatehi/laravel-msegat",
+    "description": "A professional Laravel package for integrating with Msegat SMS, OTP, and WhatsApp APIs. Production-ready for SaaS, enterprise, and open-source projects.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "msegat", "sms", "otp", "whatsapp", "laravel", "saudi-arabia",
+        "sms-gateway", "bulk-sms", "notification-channel", "message"
+    ],
+    "authors": [
+        {
+            "name": "AL-AGHBARI Fatehi",
+            "homepage": "https://github.com/aghfatehi"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/http": "^10.0|^11.0|^12.0",
+        "illuminate/notifications": "^10.0|^11.0|^12.0",
+        "illuminate/queue": "^10.0|^11.0|^12.0",
+        "illuminate/database": "^10.0|^11.0|^12.0",
+        "illuminate/events": "^10.0|^11.0|^12.0",
+        "ext-json": "*",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5|^11.0",
+        "orchestra/testbench": "^8.0|^9.0|^10.0",
+        "laravel/pint": "^1.13",
+        "phpstan/phpstan": "^1.11",
+        "phpstan/phpstan-phpunit": "^1.4",
+        "rector/rector": "^1.0",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/larastan": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Aghfatehi\\Msegat\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Aghfatehi\\Msegat\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage",
+        "lint": "pint --test",
+        "lint-fix": "pint",
+        "analyse": "phpstan analyse --memory-limit=256M",
+        "rector": "rector process src --dry-run"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Aghfatehi\\Msegat\\MsegatServiceProvider"
+            ],
+            "aliases": {
+                "Msegat": "Aghfatehi\\Msegat\\Facades\\Msegat"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

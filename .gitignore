@@ -1,0 +1,14 @@
+vendor/
+node_modules/
+.phpunit.*
+.php_cs.cache
+rector.php
+*.svg
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+coverage/
+.DS_Store
+Thumbs.db

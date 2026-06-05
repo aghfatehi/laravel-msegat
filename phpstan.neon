@@ -1,0 +1,10 @@
+parameters:
+    level: 2
+    paths:
+        - src
+    excludePaths:
+        - src/Http/routes.php
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '/Call to an undefined method.*toMsegat/'
+        - '/Call to an undefined method.*routesAreCached/'
