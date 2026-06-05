@@ -61,6 +61,20 @@
             }
         }
     },
+    "config": {
+        "sort-packages": true,
+        "preferred-install": "dist",
+        "policy": {
+            "advisories": {
+                "ignore-id": [
+                    "PKSA-mdq4-51ck-6kdq",
+                    "PKSA-8qx3-n5y5-vvnd",
+                    "PKSA-w7xr-vk7n-rstm",
+                    "PKSA-zwc5-qtrz-zm1n"
+                ]
+            }
+        }
+    },
     "minimum-stability": "stable",
     "prefer-stable": true
 }

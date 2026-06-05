@@ -43,7 +43,7 @@ jobs:
             "illuminate/notifications:^${{ matrix.laravel }}" \
             "illuminate/queue:^${{ matrix.laravel }}" \
             "illuminate/events:^${{ matrix.laravel }}" \
-            --dev --no-interaction --no-update
+            --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
       - name: Run PHPStan
