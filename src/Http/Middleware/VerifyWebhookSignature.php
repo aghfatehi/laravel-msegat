@@ -26,7 +26,7 @@ class VerifyWebhookSignature
             }
 
             $payload = $request->getContent();
-            $expected = hash_hmac('sha256', $timestamp . '.' . $payload, $secret);
+            $expected = hash_hmac('sha256', $timestamp.'.'.$payload, $secret);
 
             if (! hash_equals($expected, $signature)) {
                 throw new WebhookSignatureException('Invalid webhook signature');

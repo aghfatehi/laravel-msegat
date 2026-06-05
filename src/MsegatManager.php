@@ -190,7 +190,7 @@ class MsegatManager
         return $result;
     }
 
-    public function queue(string $connection = null, string $queue = null): void
+    public function queue(?string $connection = null, ?string $queue = null): void
     {
         $this->validateForSend();
 
@@ -332,7 +332,7 @@ class MsegatManager
         return $response;
     }
 
-    public function getMessages(string $bulkId, int $page = 1, int $limit = null): array
+    public function getMessages(string $bulkId, int $page = 1, ?int $limit = null): array
     {
         $filters = [
             'reqBulkId' => $bulkId,
