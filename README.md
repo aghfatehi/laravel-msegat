@@ -12,7 +12,8 @@
 <h3 align="center">SMS, OTP, and WhatsApp integration for the Msegat gateway</h3>
 
 <p align="center">
-    <strong>Production-ready for SaaS, enterprise, and open-source projects. Supports Laravel 10, 11, and 12 with PHP 8.2+.</strong>
+    <strong>Production-ready for SaaS, enterprise, and open-source projects. Supports Laravel 10, 11, and 12 with PHP 8.2+.</strong><br>
+    Created by <a href="https://github.com/aghfatehi">AL-AGHBARI Fatehi</a>
 </p>
 
 ---
@@ -434,7 +435,7 @@ Contributions are welcome! Please follow these steps to contribute:
 
 ## Support
 
-If you have any questions or issues, feel free to open an issue on the [GitHub repository](https://github.com/aghfatehi/laravel-msegat/issues) or contact the author.
+If you have any questions or issues, feel free to open an issue on the [GitHub repository](https://github.com/aghfatehi/laravel-msegat/issues) or contact the author [AL-AGHBARI Fatehi](mailto:fathi.a.n2002@gmail.com).
 
 ---
 
