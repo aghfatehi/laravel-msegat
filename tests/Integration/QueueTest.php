@@ -7,20 +7,23 @@ use Aghfatehi\Msegat\Jobs\SendSmsJob;
 use Aghfatehi\Msegat\MsegatClient;
 use Aghfatehi\Msegat\Tests\TestCase;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Http;
+use Mockery\MockInterface;
 
 class QueueTest extends TestCase
 {
+    private MockInterface $clientMock;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->clientMock = $this->mock(MsegatClient::class);
+        Msegat::setClient($this->clientMock);
+    }
+
     public function test_sms_job_dispatched(): void
     {
         Bus::fake();
-
-        Http::fake([
-            'https://www.msegat.com/gw/sendsms.php' => Http::response([
-                'code' => '1',
-                'message' => 'Success',
-            ], 200),
-        ]);
 
         Msegat::sms()
             ->to('966512345678')
@@ -32,12 +35,12 @@ class QueueTest extends TestCase
 
     public function test_sms_job_handles_successful_response(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/sendsms.php' => Http::response([
+        $this->clientMock->shouldReceive('send')
+            ->once()
+            ->andReturn([
                 'code' => '1',
                 'message' => 'Success',
-            ], 200),
-        ]);
+            ]);
 
         $job = new SendSmsJob([
             'numbers' => '966512345678',
@@ -49,7 +52,5 @@ class QueueTest extends TestCase
         ]);
 
         $job->handle(app(MsegatClient::class));
-
-        $this->expectNotToPerformAssertions();
     }
 }

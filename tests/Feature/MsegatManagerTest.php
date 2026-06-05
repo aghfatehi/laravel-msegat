@@ -4,11 +4,22 @@ namespace Aghfatehi\Msegat\Tests\Feature;
 
 use Aghfatehi\Msegat\Exceptions\ValidationException;
 use Aghfatehi\Msegat\Facades\Msegat;
+use Aghfatehi\Msegat\MsegatClient;
 use Aghfatehi\Msegat\Tests\TestCase;
-use Illuminate\Support\Facades\Http;
+use Mockery\MockInterface;
 
 class MsegatManagerTest extends TestCase
 {
+    private MockInterface $clientMock;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->clientMock = $this->mock(MsegatClient::class);
+        Msegat::setClient($this->clientMock);
+    }
+
     public function test_sms_send_validates_numbers(): void
     {
         $this->expectException(ValidationException::class);
@@ -29,12 +40,12 @@ class MsegatManagerTest extends TestCase
 
     public function test_sms_send_makes_http_call(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/sendsms.php' => Http::response([
+        $this->clientMock->shouldReceive('send')
+            ->once()
+            ->andReturn([
                 'code' => '1',
                 'message' => 'Success',
-            ], 200),
-        ]);
+            ]);
 
         $response = Msegat::sms()
             ->to('966512345678')
@@ -47,12 +58,12 @@ class MsegatManagerTest extends TestCase
 
     public function test_sms_send_with_bulk_id(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/sendsms.php' => Http::response([
+        $this->clientMock->shouldReceive('send')
+            ->once()
+            ->andReturn([
                 'code' => '1-BULK123',
                 'message' => 'Success',
-            ], 200),
-        ]);
+            ]);
 
         $response = Msegat::sms()
             ->to(['966512345678', '966598765432'])
@@ -66,12 +77,12 @@ class MsegatManagerTest extends TestCase
 
     public function test_sms_send_multiple_numbers(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/sendsms.php' => Http::response([
+        $this->clientMock->shouldReceive('send')
+            ->once()
+            ->andReturn([
                 'code' => '1',
                 'message' => 'Success',
-            ], 200),
-        ]);
+            ]);
 
         $response = Msegat::sms()
             ->to(['0512345678', '0598765432'])
@@ -83,12 +94,12 @@ class MsegatManagerTest extends TestCase
 
     public function test_otp_send(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/sendOTPCode.php' => Http::response([
+        $this->clientMock->shouldReceive('sendOtp')
+            ->once()
+            ->andReturn([
                 'code' => '1',
                 'id' => 'otp_test_123',
-            ], 200),
-        ]);
+            ]);
 
         $response = Msegat::otp()
             ->to('966512345678')
@@ -100,12 +111,12 @@ class MsegatManagerTest extends TestCase
 
     public function test_otp_verify(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/verifyOTPCode.php' => Http::response([
+        $this->clientMock->shouldReceive('verifyOtp')
+            ->once()
+            ->andReturn([
                 'code' => '1',
                 'message' => 'Verified',
-            ], 200),
-        ]);
+            ]);
 
         $response = Msegat::otp()
             ->to('966512345678')
@@ -116,9 +127,9 @@ class MsegatManagerTest extends TestCase
 
     public function test_get_balance(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/Credits.php' => Http::response('3042.00', 200),
-        ]);
+        $this->clientMock->shouldReceive('getBalance')
+            ->once()
+            ->andReturn('3042.00');
 
         $balance = Msegat::getBalance();
 
@@ -128,9 +139,9 @@ class MsegatManagerTest extends TestCase
 
     public function test_calculate_cost(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/calculateCost.php' => Http::response('3,9', 200),
-        ]);
+        $this->clientMock->shouldReceive('calculateCost')
+            ->once()
+            ->andReturn('3,9');
 
         $cost = Msegat::sms()
             ->to(['966512345678', '966598765432'])
@@ -142,12 +153,12 @@ class MsegatManagerTest extends TestCase
 
     public function test_custom_sender(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/sendsms.php' => Http::response([
+        $this->clientMock->shouldReceive('send')
+            ->once()
+            ->andReturn([
                 'code' => '1',
                 'message' => 'Success',
-            ], 200),
-        ]);
+            ]);
 
         $response = Msegat::sms()
             ->sender('CustomAD')
@@ -160,12 +171,12 @@ class MsegatManagerTest extends TestCase
 
     public function test_scheduled_message(): void
     {
-        Http::fake([
-            'https://www.msegat.com/gw/sendsms.php' => Http::response([
+        $this->clientMock->shouldReceive('send')
+            ->once()
+            ->andReturn([
                 'code' => '1',
                 'message' => 'Success',
-            ], 200),
-        ]);
+            ]);
 
         $response = Msegat::sms()
             ->to('966512345678')

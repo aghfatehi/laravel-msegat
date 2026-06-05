@@ -402,7 +402,14 @@ class MsegatManager
         return $this->sender ?: config('msegat.sender', '');
     }
 
-    private function getClient(): MsegatClient
+    public function setClient(MsegatClient $client): self
+    {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    public function getClient(): MsegatClient
     {
         if (! $this->client) {
             $this->client = new MsegatClient;
@@ -413,7 +420,6 @@ class MsegatManager
 
     private function reset(): void
     {
-        $this->client = null;
         $this->numbers = [];
         $this->message = null;
         $this->sender = null;

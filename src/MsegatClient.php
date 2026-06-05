@@ -5,16 +5,13 @@ namespace Aghfatehi\Msegat;
 use Aghfatehi\Msegat\Enums\ApiEndpoint;
 use Aghfatehi\Msegat\Exceptions\ApiException;
 use Aghfatehi\Msegat\Exceptions\MsegatException;
-use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class MsegatClient
 {
-    private PendingRequest $http;
-
     private array $credentials;
+
+    private array $config;
 
     public function __construct()
     {
@@ -25,18 +22,7 @@ class MsegatClient
             'apiKey' => $config['api_key'],
         ];
 
-        $this->http = Http::baseUrl($config['base_url'])
-            ->timeout($config['http_client']['timeout'])
-            ->connectTimeout($config['http_client']['connect_timeout'])
-            ->withOptions([
-                'verify' => $config['verify_ssl'],
-            ])
-            ->retry(
-                $config['http_client']['max_retries'],
-                $config['http_client']['retry_delay'],
-                fn ($exception) => $exception instanceof RequestException,
-            )
-            ->asMultipart();
+        $this->config = $config;
     }
 
     public function send(array $data): array
@@ -63,14 +49,10 @@ class MsegatClient
     {
         $payload = $this->buildMultipart(ApiEndpoint::Balance, []);
 
-        $response = $this->http->post(
-            config('msegat.endpoints.balance'),
+        $body = $this->curlPost(
+            $this->config['base_url'].$this->config['endpoints']['balance'],
             $payload
         );
-
-        $this->logRequest('POST', config('msegat.endpoints.balance'), $response->status());
-
-        $body = $response->body();
 
         if (in_array($body, ['M0002', '1020', 'M0001', '1010'], true)) {
             throw new ApiException($body, "Balance inquiry failed: {$body}");
@@ -93,27 +75,19 @@ class MsegatClient
     {
         $payload = $this->buildMultipart(ApiEndpoint::CalculateCost, $data);
 
-        $response = $this->http->post(
-            config('msegat.endpoints.calculate_cost'),
+        return $this->curlPost(
+            $this->config['base_url'].$this->config['endpoints']['calculate_cost'],
             $payload
         );
-
-        $this->logRequest('POST', config('msegat.endpoints.calculate_cost'), $response->status());
-
-        return $response->body();
     }
 
     private function request(ApiEndpoint $endpoint, array $data): array
     {
-        $path = $endpoint->path();
+        $url = $this->config['base_url'].$endpoint->path();
 
         $payload = $this->buildMultipart($endpoint, $data);
 
-        $response = $this->http->post($path, $payload);
-
-        $this->logRequest('POST', $path, $response->status());
-
-        $body = $response->body();
+        $body = $this->curlPost($url, $payload);
 
         $decoded = json_decode($body, true);
 
@@ -148,13 +122,47 @@ class MsegatClient
         return $payload;
     }
 
-    private function logRequest(string $method, string $path, int $status): void
+    private function curlPost(string $url, array $multipartData): string
     {
-        if (! config('msegat.logging.enabled')) {
-            return;
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->config['http_client']['timeout']);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->config['http_client']['connect_timeout']);
+
+        if (! $this->config['verify_ssl']) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         }
 
-        Log::channel(config('msegat.logging.channel'))
-            ->log(config('msegat.logging.level'), "Msegat API: {$method} {$path} responded {$status}");
+        $postFields = [];
+        foreach ($multipartData as $part) {
+            $postFields[$part['name']] = $part['contents'];
+        }
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+
+        curl_close($ch);
+
+        $this->logRequest('POST', $url, $httpCode);
+
+        if ($error) {
+            throw new MsegatException("cURL error: {$error}");
+        }
+
+        return $response;
+    }
+
+    private function logRequest(string $method, string $path, int $status): void
+    {
+        if ($this->config['logging']['enabled'] ?? false) {
+            Log::channel($this->config['logging']['channel'])
+                ->log($this->config['logging']['level'], "Msegat API: {$method} {$path} responded {$status}");
+        }
     }
 }
