@@ -46,6 +46,16 @@ Track sent messages, OTP requests, delivery reports, and webhooks in your databa
 
 > This step is **optional**. The package works fully without migrations — skip this section if you don't need database logging.
 
+**Option A — Run migrations directly from the package (recommended):**
+
+Runs only the package's migrations without publishing:
+
+```bash
+php artisan migrate --path=/vendor/aghfatehi/laravel-msegat/database/migrations
+```
+
+**Option B — Publish then migrate (if you need to modify the migrations):**
+
 ```bash
 php artisan vendor:publish --provider="Aghfatehi\Msegat\MsegatServiceProvider" --tag=msegat-migrations
 php artisan migrate
