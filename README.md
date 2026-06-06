@@ -32,7 +32,19 @@ Laravel auto-discovery registers the service provider and facade automatically.
 php artisan vendor:publish --provider="Aghfatehi\Msegat\MsegatServiceProvider" --tag=msegat-config
 ```
 
-### Publish Migrations
+### Publish Migrations (Optional)
+
+Track sent messages, OTP requests, delivery reports, and webhooks in your database. If you publish and run the migrations, five tables will be created:
+
+| Table | Purpose |
+|-------|---------|
+| `msegat_sms_logs` | History of all sent SMS messages |
+| `msegat_otp_requests` | OTP request tracking |
+| `msegat_delivery_reports` | Delivery report storage from Msegat |
+| `msegat_webhook_logs` | Webhook event log |
+| `msegat_failed_requests` | Failed request records |
+
+> This step is **optional**. The package works fully without migrations — skip this section if you don't need database logging.
 
 ```bash
 php artisan vendor:publish --provider="Aghfatehi\Msegat\MsegatServiceProvider" --tag=msegat-migrations
