@@ -3,6 +3,7 @@
 namespace Aghfatehi\Msegat\Http\Controllers;
 
 use Aghfatehi\Msegat\Jobs\ProcessWebhookJob;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +20,7 @@ class WebhookController extends Controller
      * Handle delivery report webhook.
      *
      * @param  Request  $request  The incoming webhook request.
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function deliveryReport(Request $request)
     {
@@ -42,7 +43,7 @@ class WebhookController extends Controller
      * Handle message status update webhook.
      *
      * @param  Request  $request  The incoming webhook request.
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function status(Request $request)
     {
@@ -65,7 +66,7 @@ class WebhookController extends Controller
      * Handle incoming message webhook (replies from recipients).
      *
      * @param  Request  $request  The incoming webhook request.
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function incoming(Request $request)
     {
@@ -88,7 +89,7 @@ class WebhookController extends Controller
      * Handle failed message webhook.
      *
      * @param  Request  $request  The incoming webhook request.
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function failed(Request $request)
     {

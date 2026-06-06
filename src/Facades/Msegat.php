@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static float calculateCost()
  * @method static SmsResponse sendTestMessage()
  * @method static MsegatManager forBulkId(string $bulkId)
- * @see \Aghfatehi\Msegat\MsegatManager
+ * @see MsegatManager
  */
 class Msegat extends Facade
 {
