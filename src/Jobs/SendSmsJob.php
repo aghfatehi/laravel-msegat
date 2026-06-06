@@ -42,7 +42,6 @@ class SendSmsJob implements ShouldQueue
      * and fails on unsuccessful responses.
      *
      * @param  MsegatClient  $client  Auto-injected by Laravel's service container.
-     * @return void
      *
      * @throws \RuntimeException If sending fails.
      */

@@ -28,7 +28,6 @@ readonly class SmsResponse
      *
      * @param  array<string,mixed>  $response  The raw API response.
      * @param  bool  $requireBulkId  OPTIONAL. True to parse bulk ID from response code.
-     * @return self
      */
     public static function fromApiResponse(array $response, bool $requireBulkId = false): self
     {

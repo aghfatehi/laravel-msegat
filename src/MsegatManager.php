@@ -339,7 +339,6 @@ class MsegatManager
      * The count of $vars arrays must match the count of recipient numbers.
      *
      * @param  array<int,array<string,string>>  $vars  REQUIRED. Array of variable maps, one per recipient.
-     * @return SmsResponse
      *
      * @throws ValidationException If numbers/message missing or vars count mismatched.
      */
@@ -387,8 +386,6 @@ class MsegatManager
      *
      * Only the first number in the recipients list is used.
      *
-     * @return OtpResponse
-     *
      * @throws ValidationException If no recipient number is set.
      */
     public function sendOtp(): OtpResponse
@@ -419,7 +416,6 @@ class MsegatManager
      * Verify an OTP code submitted by the user.
      *
      * @param  string  $code  REQUIRED. The OTP code to verify.
-     * @return OtpResponse
      *
      * @throws ValidationException If no recipient number is set.
      */
@@ -449,8 +445,6 @@ class MsegatManager
 
     /**
      * Check the Msegat account balance (remaining SMS credits).
-     *
-     * @return BalanceResponse
      */
     public function getBalance(): BalanceResponse
     {
@@ -532,8 +526,6 @@ class MsegatManager
 
     /**
      * Send a quick test message using default sender 'OTP'.
-     *
-     * @return SmsResponse
      */
     public function sendTestMessage(): SmsResponse
     {
@@ -559,8 +551,6 @@ class MsegatManager
     /**
      * Validate that required fields (numbers, message) are present before sending.
      *
-     * @return void
-     *
      * @throws ValidationException
      */
     private function validateForSend(): void
@@ -575,8 +565,6 @@ class MsegatManager
 
     /**
      * Resolve the sender name: use explicitly set sender or fall back to config default.
-     *
-     * @return string
      */
     private function resolveSender(): string
     {
@@ -598,8 +586,6 @@ class MsegatManager
 
     /**
      * Get the MsegatClient instance, creating a default one if none was injected.
-     *
-     * @return MsegatClient
      */
     public function getClient(): MsegatClient
     {
@@ -612,8 +598,6 @@ class MsegatManager
 
     /**
      * Reset all builder properties to their defaults for the next use.
-     *
-     * @return void
      */
     private function reset(): void
     {

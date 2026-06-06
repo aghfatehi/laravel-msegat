@@ -21,8 +21,6 @@ class MsegatServiceProvider extends ServiceProvider
      *
      * Merges package config and registers MsegatManager as a singleton
      * under both the class name and the 'msegat' alias.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -43,8 +41,6 @@ class MsegatServiceProvider extends ServiceProvider
      * Publishes config and migrations (console only), loads migrations,
      * registers webhook routes, and extends Laravel's notification system
      * with the 'msegat' channel.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -74,8 +70,6 @@ class MsegatServiceProvider extends ServiceProvider
 
     /**
      * Load webhook routes if the route cache is not active.
-     *
-     * @return void
      */
     private function registerWebhookRoutes(): void
     {

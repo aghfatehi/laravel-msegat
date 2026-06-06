@@ -248,7 +248,6 @@ class MsegatClient
      * @param  string  $method  HTTP method (e.g. POST).
      * @param  string  $path  The request URL path.
      * @param  int  $status  HTTP status code.
-     * @return void
      */
     private function logRequest(string $method, string $path, int $status): void
     {

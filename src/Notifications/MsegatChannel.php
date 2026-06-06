@@ -19,7 +19,6 @@ class MsegatChannel
      *
      * @param  object  $notifiable  The notifiable entity.
      * @param  Notification  $notification  The notification instance.
-     * @return void
      */
     public function send(object $notifiable, Notification $notification): void
     {

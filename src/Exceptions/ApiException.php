@@ -25,8 +25,6 @@ class ApiException extends MsegatException
 
     /**
      * Get the raw Msegat API error code.
-     *
-     * @return string
      */
     public function getApiCode(): string
     {

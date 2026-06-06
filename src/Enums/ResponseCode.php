@@ -48,8 +48,6 @@ enum ResponseCode: string
 
     /**
      * Get a human-readable description of this response code.
-     *
-     * @return string
      */
     public function message(): string
     {

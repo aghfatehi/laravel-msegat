@@ -25,7 +25,6 @@ readonly class OtpResponse
      * Create an OtpResponse from the API's JSON-decoded response array.
      *
      * @param  array<string,mixed>  $response  The raw API response.
-     * @return self
      */
     public static function fromApiResponse(array $response): self
     {

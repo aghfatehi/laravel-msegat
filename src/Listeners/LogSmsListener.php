@@ -16,7 +16,6 @@ class LogSmsListener
      * Handle the MessageSent event.
      *
      * @param  MessageSent  $event  The event containing the SMS response.
-     * @return void
      */
     public function handle(MessageSent $event): void
     {

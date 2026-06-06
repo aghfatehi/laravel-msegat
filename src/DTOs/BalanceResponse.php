@@ -23,7 +23,6 @@ readonly class BalanceResponse
      * Create a BalanceResponse from the raw API response string.
      *
      * @param  string  $body  The raw response body (credit count or error code).
-     * @return self
      */
     public static function fromRawResponse(string $body): self
     {

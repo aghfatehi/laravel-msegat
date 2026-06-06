@@ -113,7 +113,6 @@ class WebhookController extends Controller
      * Aborts with 401 if the signature is missing, expired, or invalid.
      *
      * @param  Request  $request  The incoming HTTP request.
-     * @return void
      */
     private function verifySignature(Request $request): void
     {
