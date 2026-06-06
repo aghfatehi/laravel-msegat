@@ -22,7 +22,7 @@ class MsegatClient
     private array $config;
 
     /**
-     * @param  array<string,mixed>|null  $config  OPTIONAL. Config override for testing.
+     * Initializes the Msegat API client with credentials from config/msegat.php.
      */
     public function __construct()
     {
