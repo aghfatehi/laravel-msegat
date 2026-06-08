@@ -2,6 +2,7 @@
 
 namespace Aghfatehi\Msegat\Tests\Feature;
 
+use Aghfatehi\Msegat\Clients\T2WhatsAppClient;
 use Aghfatehi\Msegat\Exceptions\ValidationException;
 use Aghfatehi\Msegat\Facades\Msegat;
 use Aghfatehi\Msegat\MsegatClient;
@@ -12,12 +13,17 @@ class MsegatManagerTest extends TestCase
 {
     private MockInterface $clientMock;
 
+    private MockInterface $whatsAppClientMock;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->clientMock = $this->mock(MsegatClient::class);
         Msegat::setClient($this->clientMock);
+
+        $this->whatsAppClientMock = $this->mock(T2WhatsAppClient::class);
+        Msegat::setWhatsAppClient($this->whatsAppClientMock);
     }
 
     public function test_sms_send_validates_numbers(): void
@@ -187,15 +193,94 @@ class MsegatManagerTest extends TestCase
         $this->assertTrue($response->successful);
     }
 
-    public function test_send_whatsapp_fallback(): void
+    public function test_send_whatsapp_text(): void
     {
+        $this->whatsAppClientMock->shouldReceive('sendText')
+            ->once()
+            ->with('966512345678', 'Hello from WhatsApp')
+            ->andReturn([
+                'id' => 'conv_001',
+                'messageId' => 'wa_msg_001',
+                'contactNumber' => '966512345678',
+                'status' => 'Sent',
+                'contactName' => 'Ahmed',
+            ]);
+
+        $response = Msegat::whatsapp()
+            ->to('966512345678')
+            ->message('Hello from WhatsApp')
+            ->send();
+
+        $this->assertTrue($response->successful);
+        $this->assertSame('wa_msg_001', $response->messageId);
+        $this->assertSame('Sent', $response->status);
+        $this->assertSame('966512345678', $response->contactNumber);
+    }
+
+    public function test_send_whatsapp_template(): void
+    {
+        $this->whatsAppClientMock->shouldReceive('sendTemplate')
+            ->once()
+            ->with('966512345678', 'welcome', ['Ahmed', 'T2'])
+            ->andReturn([
+                'id' => 'conv_002',
+                'messageId' => 'wa_msg_002',
+                'contactNumber' => '966512345678',
+                'status' => 'Sent',
+                'contactName' => 'Ahmed',
+            ]);
+
         $response = Msegat::whatsapp()
             ->to('966512345678')
             ->template('welcome')
-            ->variables(['name' => 'Ahmed'])
+            ->variables(['Ahmed', 'T2'])
             ->send();
 
-        $this->assertFalse($response->successful);
-        $this->assertSame('M0099', $response->code);
+        $this->assertTrue($response->successful);
+        $this->assertSame('wa_msg_002', $response->messageId);
+        $this->assertSame('Sent', $response->status);
+    }
+
+    public function test_whatsapp_validates_numbers(): void
+    {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('At least one recipient number is required for WhatsApp.');
+
+        Msegat::whatsapp()
+            ->message('Hello')
+            ->send();
+    }
+
+    public function test_whatsapp_validates_message_or_template(): void
+    {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Either a message body or a template name is required for WhatsApp.');
+
+        Msegat::whatsapp()
+            ->to('966512345678')
+            ->send();
+    }
+
+    public function test_whatsapp_template_takes_precedence(): void
+    {
+        $this->whatsAppClientMock->shouldReceive('sendTemplate')
+            ->once()
+            ->with('966512345678', 'welcome', ['John'])
+            ->andReturn([
+                'id' => 'conv_003',
+                'messageId' => 'wa_msg_003',
+                'contactNumber' => '966512345678',
+                'status' => 'Sent',
+            ]);
+
+        $response = Msegat::whatsapp()
+            ->to('966512345678')
+            ->message('This text is ignored when template is set')
+            ->template('welcome')
+            ->variables(['John'])
+            ->send();
+
+        $this->assertTrue($response->successful);
+        $this->assertSame('wa_msg_003', $response->messageId);
     }
 }

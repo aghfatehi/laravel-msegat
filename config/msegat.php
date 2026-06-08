@@ -49,6 +49,14 @@ return [
         'max_requests_per_minute' => (int) env('MSEGAT_OTP_RATE_LIMIT', 3),
     ],
 
+    'whatsapp' => [
+        'email' => env('MSEGAT_WHATSAPP_EMAIL'),
+        'password' => env('MSEGAT_WHATSAPP_PASSWORD'),
+        'base_url' => env('MSEGAT_WHATSAPP_BASE_URL', 'https://communicateapi.t2.sa/api'),
+        'token_cache_ttl' => (int) env('MSEGAT_WHATSAPP_TOKEN_CACHE_TTL', 3300),
+        'timeout' => (int) env('MSEGAT_WHATSAPP_TIMEOUT', 30),
+    ],
+
     'endpoints' => [
         'send' => 'sendsms.php',
         'send_personalized' => 'sendVars.php',

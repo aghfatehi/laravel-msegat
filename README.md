@@ -79,6 +79,8 @@ MSEGAT_VERIFY_SSL=true
 MSEGAT_QUEUE_ENABLED=false
 MSEGAT_LOGGING_ENABLED=true
 MSEGAT_WEBHOOK_SECRET=your_webhook_secret
+MSEGAT_WHATSAPP_EMAIL=your_t2_email
+MSEGAT_WHATSAPP_PASSWORD=your_t2_password
 ```
 
 ### Config Options
@@ -95,6 +97,10 @@ MSEGAT_WEBHOOK_SECRET=your_webhook_secret
 | `MSEGAT_QUEUE_ENABLED` | `false` | No | Enable async webhook processing |
 | `MSEGAT_LOGGING_ENABLED` | `true` | No | Enable request/response logging |
 | `MSEGAT_WEBHOOK_SECRET` | `''` | No | Secret for webhook signature verification |
+| `MSEGAT_WHATSAPP_EMAIL` | — | No | T2 Communicate WhatsApp login email |
+| `MSEGAT_WHATSAPP_PASSWORD` | — | No | T2 Communicate WhatsApp login password |
+| `MSEGAT_WHATSAPP_BASE_URL` | `https://communicateapi.t2.sa/api` | No | T2 WhatsApp API base URL |
+| `MSEGAT_WHATSAPP_TOKEN_CACHE_TTL` | `3300` | No | JWT token cache TTL (seconds) |
 
 ---
 
@@ -173,18 +179,45 @@ if ($verification->successful) {
 }
 ```
 
-### WhatsApp (Abstract)
+### WhatsApp (T2 Communicate API)
 
-WhatsApp endpoints are not yet publicly documented by Msegat. Calling `send()` on WhatsApp mode returns a graceful fallback response.
+WhatsApp messages are sent via the [T2 Communicate](https://t2.sa) WhatsApp Business API — a separate gateway from Msegat SMS. Requires its own credentials.
+
+#### Text Message
+
+```php
+$response = Msegat::whatsapp()
+    ->to('966512345678')
+    ->message('Hello from WhatsApp!')
+    ->send();
+
+$messageId = $response->messageId;
+```
+
+#### Template Message
 
 ```php
 $response = Msegat::whatsapp()
     ->to('966512345678')
     ->template('welcome')
-    ->variables(['name' => 'Ahmed'])
+    ->variables(['John', 'Support'])
     ->send();
-// Returns unsuccessful response with informative message
+
+if ($response->successful) {
+    echo "Sent: {$response->messageId}";
+}
 ```
+
+#### Response Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `successful` | `bool` | Whether the API accepted the message |
+| `messageId` | `string` | Unique message ID for tracking |
+| `conversationId` | `string` | WhatsApp conversation ID |
+| `contactNumber` | `string` | Recipient phone number |
+| `status` | `string` | `Sent`, `Delivered`, `Read`, `Failed`, etc. |
+| `contactName` | `string|null` | Contact display name |
 
 ### Balance
 
@@ -260,7 +293,7 @@ The `SendSmsJob` retries up to 3 times with a 5-second backoff.
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `MessageSending` | `$data` (array) | Before sending SMS |
-| `MessageSent` | `$response` (SmsResponse) | After SMS sent |
+| `MessageSent` | `$response` (SmsResponse) | After SMS or WhatsApp sent |
 | `OtpGenerated` | `$number`, `$response` (OtpResponse) | After OTP sent |
 | `OtpVerified` | `$number`, `$code`, `$response` (OtpResponse) | After OTP verified |
 | `WebhookReceived` | `$type`, `$payload` (array) | When webhook is received |
@@ -356,8 +389,8 @@ composer test-coverage
 ```
 
 The test suite includes:
-- **Unit Tests**: DTOs, enums, exceptions, phone formatter
-- **Feature Tests**: SMS sending, OTP, balance, webhooks, config
+- **Unit Tests**: DTOs, enums, exceptions, phone formatter, WhatsApp response
+- **Feature Tests**: SMS sending, OTP, balance, webhooks, config, WhatsApp text/template
 - **Integration Tests**: Events, queues
 
 ---

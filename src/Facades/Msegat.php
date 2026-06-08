@@ -5,6 +5,7 @@ namespace Aghfatehi\Msegat\Facades;
 use Aghfatehi\Msegat\DTOs\BalanceResponse;
 use Aghfatehi\Msegat\DTOs\OtpResponse;
 use Aghfatehi\Msegat\DTOs\SmsResponse;
+use Aghfatehi\Msegat\DTOs\WhatsAppMessageResponse;
 use Aghfatehi\Msegat\MsegatManager;
 use Illuminate\Support\Facades\Facade;
 
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static MsegatManager lang(string $language)
  * @method static MsegatManager template(string $template)
  * @method static MsegatManager variables(array $variables)
- * @method static SmsResponse send()
+ * @method static SmsResponse|WhatsAppMessageResponse send()
  * @method static void queue(string $connection = null, string $queue = null)
  * @method static SmsResponse sendPersonalized(array $vars)
  * @method static OtpResponse sendOtp()

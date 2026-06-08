@@ -2,9 +2,11 @@
 
 namespace Aghfatehi\Msegat;
 
+use Aghfatehi\Msegat\Clients\T2WhatsAppClient;
 use Aghfatehi\Msegat\DTOs\BalanceResponse;
 use Aghfatehi\Msegat\DTOs\OtpResponse;
 use Aghfatehi\Msegat\DTOs\SmsResponse;
+use Aghfatehi\Msegat\DTOs\WhatsAppMessageResponse;
 use Aghfatehi\Msegat\Events\MessageSending;
 use Aghfatehi\Msegat\Events\MessageSent;
 use Aghfatehi\Msegat\Events\OtpGenerated;
@@ -21,8 +23,11 @@ use Carbon\Carbon;
  */
 class MsegatManager
 {
-    /** The HTTP client used to communicate with Msegat API. */
+    /** The HTTP client used to communicate with Msegat SMS API. */
     private ?MsegatClient $client = null;
+
+    /** The HTTP client used to communicate with T2 WhatsApp API. */
+    private ?T2WhatsAppClient $whatsAppClient = null;
 
     /** @var array<int,string> Recipient phone number(s). */
     private array $numbers = [];
@@ -85,7 +90,7 @@ class MsegatManager
     }
 
     /**
-     * Set mode to WhatsApp messaging (currently limited support).
+     * Set mode to WhatsApp messaging via the T2 Communicate API.
      *
      * @return $this
      */
@@ -233,24 +238,19 @@ class MsegatManager
     }
 
     /**
-     * Send the SMS message immediately.
+     * Send a message (SMS, OTP, or WhatsApp) immediately.
      *
-     * @return SmsResponse The API response with success status, message, and optional bulkId.
+     * Sends via the T2 WhatsApp API when mode is 'whatsapp', otherwise
+     * sends via the Msegat SMS API.
      *
-     * @throws ValidationException If numbers or message are missing.
+     * @return SmsResponse|WhatsAppMessageResponse The API response.
+     *
+     * @throws ValidationException If required fields are missing.
      */
-    public function send(): SmsResponse
+    public function send(): SmsResponse|WhatsAppMessageResponse
     {
         if ($this->mode === 'whatsapp') {
-            $result = new SmsResponse(
-                successful: false,
-                code: 'M0099',
-                message: 'WhatsApp API endpoints are not yet documented by Msegat. Use SMS or OTP instead.',
-            );
-
-            $this->reset();
-
-            return $result;
+            return $this->sendWhatsAppMessage();
         }
 
         $this->validateForSend();
@@ -281,6 +281,46 @@ class MsegatManager
         $result = SmsResponse::fromApiResponse($response, $this->requestBulkId);
 
         MessageSent::dispatch($result);
+
+        $this->reset();
+
+        return $result;
+    }
+
+    /**
+     * Send a WhatsApp message via the T2 Communicate API.
+     *
+     * Sends a text message if only message() is set, or a template message
+     * if template() is set (template takes precedence).
+     *
+     *
+     * @throws ValidationException If no recipient number is set.
+     */
+    private function sendWhatsAppMessage(): WhatsAppMessageResponse
+    {
+        if (empty($this->numbers)) {
+            throw new ValidationException('At least one recipient number is required for WhatsApp.');
+        }
+
+        $client = $this->getWhatsAppClient();
+        $number = PhoneNumberFormatter::format($this->numbers[0]);
+
+        if ($this->whatsAppTemplate) {
+            $response = $client->sendTemplate($number, $this->whatsAppTemplate, $this->whatsAppVariables);
+        } elseif ($this->message) {
+            $response = $client->sendText($number, $this->message);
+        } else {
+            throw new ValidationException('Either a message body or a template name is required for WhatsApp.');
+        }
+
+        $result = WhatsAppMessageResponse::fromApiResponse($response);
+
+        MessageSent::dispatch(new SmsResponse(
+            successful: $result->successful,
+            code: $result->successful ? '1' : 'M0001',
+            message: $result->message,
+            raw: $result->raw,
+        ));
 
         $this->reset();
 
@@ -594,6 +634,31 @@ class MsegatManager
         }
 
         return $this->client;
+    }
+
+    /**
+     * Inject a custom T2WhatsAppClient instance (useful for testing).
+     *
+     * @param  T2WhatsAppClient  $client  The WhatsApp client instance to use.
+     * @return $this
+     */
+    public function setWhatsAppClient(T2WhatsAppClient $client): self
+    {
+        $this->whatsAppClient = $client;
+
+        return $this;
+    }
+
+    /**
+     * Get the T2WhatsAppClient instance, creating a default one if none was injected.
+     */
+    public function getWhatsAppClient(): T2WhatsAppClient
+    {
+        if (!$this->whatsAppClient) {
+            $this->whatsAppClient = new T2WhatsAppClient;
+        }
+
+        return $this->whatsAppClient;
     }
 
     /**

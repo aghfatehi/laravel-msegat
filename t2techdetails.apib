@@ -1,0 +1,632 @@
+# T2 Communicate WhatsApp Integration - Detailed Technical Documentation
+
+## 📋 Table of Contents
+1. [🔍 Overview](#overview)
+2. [🔐 Authentication](#authentication)
+3. [⚠️ Error Codes & Status Codes](#error-codes--status-codes)
+4. [💬 Message APIs](#message-apis)
+5. [📝 Template APIs](#template-apis)
+6. [👥 Contact Management](#contact-management)
+7. [🔔 Webhook/Callback API](#webhookcallback-api)
+8. [📊 Response Structure Reference](#response-structure-reference)
+9. [💻 Integration Examples](#integration-examples)
+10. [✅ Best Practices](#best-practices)
+11. [❓ FAQ](#faq)
+
+---
+
+## 🔍 Overview
+
+**T2 Communicate** is a comprehensive WhatsApp Business API platform that enables businesses to integrate WhatsApp messaging capabilities seamlessly. Our robust API provides:
+
+### 🚀 Core Features
+- **Authentication & User Management** - Secure token-based authentication
+- **Multi-format Messaging** - Text, images, documents, audio, video, and templates
+- **Contact & Group Management** - Organize and manage your contact database
+- **Template Management** - Create, sync, and manage WhatsApp Business templates
+- **Real-time Webhooks** - Get instant delivery status updates
+- **Analytics & Reporting** - Track message performance and engagement
+- **Broadcast Campaigns** - Send bulk messages to targeted audiences
+
+### 🌐 Platform Information
+- **Base URL:** `https://communicateapi.t2.sa/api/` ⚠️ **PRODUCTION ONLY**
+- **Protocol:** HTTPS only (TLS 1.2+)
+- **Authentication:** Bearer Token (JWT)
+- **Data Format:** JSON
+
+> **🚨 IMPORTANT**: Always use the production URL `https://communicateapi.t2.sa/api/` for all API calls.
+> Never use mock or testing URLs in production environments.
+
+### 📱 Supported Message Types
+| Type | Description | Max Size | Formats |
+|------|-------------|----------|---------|
+| Text | Plain text messages with emojis | 4,096 chars | UTF-8 |
+| Image | Photo messages | 5MB | JPEG, PNG |
+| Document | File attachments | 100MB | PDF, DOC, XLS, PPT, etc. |
+| Audio | Voice messages | 16MB | MP3, AAC, AMR |
+| Video | Video messages | 16MB | MP4, 3GP |
+| Templates | WhatsApp approved templates | - | Text, Media, Interactive |
+
+## 🔐 Authentication
+
+T2 Communicate uses JWT (JSON Web Token) based authentication to secure API access. All API requests must include a valid Bearer token in the Authorization header.
+
+### 🔑 Getting Started
+
+#### Step 1: Register Your Organization
+Before using the API, you need to register your organization and create a user account.
+
+#### Step 2: Obtain Access Token
+Use your credentials to get an access token that will be used for all subsequent API calls.
+
+### 🚪 Login Endpoint
+**POST** `/auth/login`
+
+Authenticate with T2 Communicate and receive an access token.
+
+**Request Body:**
+```json
+{
+    "email": "user@example.com",
+    "password": "securepassword"
+}
+```
+
+**Success Response (200):**
+```json
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "organizationId": "org123",
+    "userId": "user456",
+    "expireInSeconds": 3600
+}
+```
+
+**Error Response (500):**
+```json
+{
+    "Type": 0,
+    "Message": "The email or password is incorrect",
+    "StatusCode": 500
+}
+```
+
+### Token Usage
+All authenticated requests must include the Bearer token in the Authorization header:
+```
+Authorization: Bearer <token>
+```
+
+## ⚠️ Error Handling & Status Codes
+
+T2 Communicate uses a standardized error response structure across all API endpoints. All errors return appropriate HTTP status codes with detailed error messages.
+
+### HTTP Status Codes
+| Status Code | Description | When It Occurs |
+|-------------|-------------|----------------|
+| 200 | Success | Request completed successfully |
+| 400 | Bad Request | Invalid request parameters or body |
+| 401 | Unauthorized | Missing or invalid authentication token |
+| 403 | Forbidden | User lacks permission for the operation |
+| 404 | Not Found | Resource not found |
+| 500 | Internal Server Error | Server-side error occurred |
+
+### Error Response Structure
+
+All API errors follow a consistent JSON structure:
+
+```json
+{
+    "Message": "Error description",
+    "StatusCode": 400,
+    "InnerException": null
+}
+```
+
+**Response Fields:**
+- `Message` (string): Human-readable error description
+- `StatusCode` (number): HTTP status code as integer
+- `InnerException` (object|null): Additional error details (usually null)
+
+### Common Error Messages
+
+#### Authentication Errors (401/403)
+- `"The email or password is incorrect"`
+- `"Super admin can't login to customer portal"`
+- `"You don't have access to the admin portal"`
+- `"Email not found. Please try again."`
+- `"Invalid or expired refresh token"`
+- `"Invalid token"`
+
+#### Resource Not Found Errors (404)
+- `"This user doesn't exist {email}"`
+- `"This organization does not exist {organizationId}"`
+- `"This number does not exist {phoneNumber}"`
+- `"Template not found"`
+- `"Contact not found"`
+- `"Contact group not found"`
+- `"This group message doesn't exist {groupMessageId}"`
+
+#### Validation Errors (400)
+- `"Contact {name} number already exists"`
+- `"Email: {email} is already exists"`
+- `"Wrong password"`
+- `"Passwords must match"`
+- `"The PhoneNumber field is not a valid phone number"`
+- `"One or more validation errors occurred"`
+
+#### Permission Errors (403)
+- `"You don't have access to this endpoint"`
+- `"sorry, you need to recharge your balance"`
+
+#### Server Errors (500)
+- `"Something went wrong. Please, try again later. ({error details})"`
+
+### Message Status Types
+
+T2 Communicate tracks message delivery status using these standardized values:
+
+| Status | Description | When It Occurs |
+|--------|-------------|----------------|
+| `Scheduled` | Message is scheduled for future delivery | When scheduling messages |
+| `InProgress` | Message is being processed | During message sending |
+| `Sent` | Message successfully sent to WhatsApp | WhatsApp confirms receipt |
+| `Delivered` | Message delivered to recipient's device | WhatsApp delivery confirmation |
+| `Read` | Message opened/read by recipient | WhatsApp read receipt |
+| `Failed` | Message delivery failed | Any delivery failure |
+| `FailedToUpdate` | Status update failed | Webhook update issues |
+
+## Message APIs
+
+### Send Custom Message
+**POST** `/message/send-custom`
+
+This is the primary endpoint for sending various types of messages to WhatsApp contacts.
+
+#### Request Structure
+```json
+{
+    "recipient": {
+        "id": "string" // Required: Contact phone number (e.g., "201276267641")
+    },
+    "message": {
+        "text": "string", // Optional: Message text content
+        "quickReplies": [ // Optional: Quick reply buttons
+            {
+                "title": "string", // Required: Button text
+                "contentType": "string", // Optional: Content type for media
+                "payload": "string" // Optional: Button payload/URL
+            }
+        ]
+    },
+    "media": { // Optional: Media attachment
+        "contentType": "string", // Required: MIME type
+        "url": "string", // Required: Media URL
+        "size": number, // Required: File size in bytes
+        "name": "string", // Required: Original filename
+        "mediaType": "string" // Required: "Image"|"File"|"Audio"|"Video"
+    }
+}
+```
+
+#### Response Structure
+```json
+{
+    "id": "string", // Conversation ID
+    "messageId": "string", // Unique message identifier
+    "contactId": "string", // Contact ID
+    "contactName": "string", // Contact display name
+    "contactNumber": "string", // Contact phone number
+    "unreadMessageCount": number, // Unread messages count
+    "lastMessage": "string", // Last message preview
+    "status": "string", // Message status: "sent"|"delivered"|"read"|"failed"
+    "intials": "string", // Contact initials for avatar
+    "profilePictureBackground": "string", // Avatar background color
+    "senderType": "string", // "user"|"contact"
+    "senderId": "string", // Sender identifier
+    "lastMessageDate": "2025-08-03T12:18:39.681Z", // ISO timestamp
+    "isTemplate": boolean, // Whether message uses template
+    "assigneeId": "string", // Optional: Assigned agent ID
+    "assigneeType": "string", // Optional: Assignment type
+    "isUnSubscribed": boolean, // Contact subscription status
+    "currentTicketId": "string", // Optional: Support ticket ID
+    "conversationStatus": "string", // Conversation state
+    "startMessageDate": "2025-08-03T12:18:39.681Z", // Conversation start time
+    "media": { // Optional: Media information
+        "title": "string", // Media title/filename
+        "type": "string", // Media type
+        "url": "string" // Media access URL
+    },
+    "templateData": { // Optional: Template structure data
+        "header": {
+            "type": "string", // "text"|"image"|"video"|"document"
+            "text": "string", // Header text content
+            "url": "string" // Header media URL
+        },
+        "body": {
+            "type": "string", // Always "text"
+            "text": "string", // Body text with parameters
+            "url": "string" // Not used for body
+        },
+        "footer": {
+            "type": "string", // Always "text"
+            "text": "string", // Footer text
+            "url": "string" // Not used for footer
+        },
+        "buttons": [ // Template buttons
+            {
+                "type": "string", // "quick_reply"|"url"|"phone_number"
+                "text": "string", // Button text
+                "url": "string", // URL for url buttons
+                "phoneNumber": "string" // Phone for call buttons
+            }
+        ]
+    }
+}
+```
+
+#### Response Field Details
+
+**Required Fields:**
+- `id`: Always present, conversation identifier
+- `messageId`: Always present, unique message ID for tracking
+- `contactId`: Always present, contact identifier
+- `contactNumber`: Always present, recipient phone number
+- `status`: Always present, current message status
+- `lastMessageDate`: Always present, timestamp of last activity
+
+**Optional Fields:**
+- `contactName`: May be null if contact has no saved name
+- `assigneeId`: Only present if conversation is assigned to an agent
+- `assigneeType`: Only present with assigneeId
+- `currentTicketId`: Only present if conversation has support ticket
+- `media`: Only present for media messages
+- `templateData`: Only present for template messages
+- `quickReplies`: Only present for messages with quick reply buttons
+
+#### Message Types and Examples
+
+**1. Text Message:**
+```json
+{
+    "recipient": {"id": "201276267641"},
+    "message": {"text": "Hello, how can I help you today?"}
+}
+```
+
+**2. Image Message:**
+```json
+{
+    "recipient": {"id": "201276267641"},
+    "media": {
+        "contentType": "image/jpeg",
+        "url": "https://example.com/image.jpg",
+        "size": 150000,
+        "name": "product.jpg",
+        "mediaType": "Image"
+    }
+}
+```
+
+**3. Template Message:**
+```json
+{
+    "recipient": {"id": "201276267641"},
+    "message": {"text": "##hello_template##John##Support##"}
+}
+```
+
+## Template APIs
+
+### List Templates
+**GET** `/template/list`
+
+**Query Parameters:**
+- `Name` (string): Filter by template name
+- `Status` (string): Filter by status ("APPROVED"|"PENDING"|"REJECTED")
+- `Category` (string): Filter by category
+- `Page` (number): Page number (default: 1)
+- `PageSize` (number): Items per page (default: 10)
+
+### Create or Update Template
+**POST** `/template/create-or-update`
+
+**Request Body:**
+```json
+{
+    "template_id": null, // null for create, string for update
+    "category": "MARKETING", // "MARKETING"|"UTILITY"|"AUTHENTICATION"
+    "name": "template_name",
+    "language": "en", // Language code
+    "components": [
+        {
+            "type": "BODY", // "HEADER"|"BODY"|"FOOTER"|"BUTTONS"
+            "text": "Hello {{1}}, welcome to {{2}}!",
+            "example": {
+                "body_text": [["John", "T2 Communicate"]]
+            }
+        }
+    ]
+}
+```
+
+## Contact Management
+
+### Create Contact
+**POST** `/contacts/create`
+
+**Request Body:**
+```json
+{
+    "name": "string", // Required: Contact name
+    "phoneNumber": "string", // Required: Valid phone number
+    "dynamicFieldsValues": [ // Optional: Custom fields
+        {
+            "organizationDynamicFieldId": "string",
+            "value": "string"
+        }
+    ],
+    "groupIds": ["string"] // Optional: Group memberships
+}
+```
+
+## Webhook/Callback API
+
+### Overview
+Yes, your understanding is correct. T2 system will call your provided callback API to post message status updates and delivery receipts.
+
+### Callback Configuration
+You need to provide T2 with your callback endpoint URL. T2 will send HTTP POST requests to this URL whenever message status changes occur.
+
+### Callback Request Structure
+T2 will send the following data to your callback URL:
+
+```json
+{
+    "messageId": "string", // Original message ID from send response
+    "conversationId": "string", // Conversation identifier
+    "contactNumber": "string", // Recipient phone number
+    "status": "string", // New message status
+    "timestamp": "2025-08-03T12:18:39.681Z", // Status change time
+    "errorCode": "string", // Optional: Error code if failed
+    "errorMessage": "string", // Optional: Error description
+    "webhookType": "message_status" // Callback type identifier
+}
+```
+
+### Message Status Values
+
+T2 Communicate webhook callbacks use these exact status values (matching the MessageStatusType constants):
+
+| Status | Description |
+|--------|-------------|
+| `Sent` | Message successfully sent to WhatsApp |
+| `Delivered` | Message delivered to recipient's device |
+| `Read` | Message opened/read by recipient |
+| `Failed` | Message delivery failed |
+| `InProgress` | Message is being processed |
+| `Scheduled` | Message scheduled for future delivery |
+
+### Callback Response Requirements
+Your callback endpoint should:
+1. Respond with HTTP 200 status for successful processing
+2. Respond within 30 seconds
+3. Handle duplicate callbacks (implement idempotency)
+4. Return non-200 status for retry scenarios
+
+### Example Callback Implementation
+```javascript
+app.post('/t2-callback', (req, res) => {
+    const { messageId, status, contactNumber, timestamp } = req.body;
+
+    // Update message status in your system
+    updateMessageStatus(messageId, status);
+
+    // Log the status change
+    console.log(`Message ${messageId} to ${contactNumber} is now ${status}`);
+
+    // Respond with success
+    res.status(200).json({ received: true });
+});
+```
+
+## Response Structure Reference
+
+### Standard Error Response
+```json
+{
+    "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+    "title": "Error Title",
+    "status": 400,
+    "detail": "Detailed error description",
+    "traceId": "trace-id-for-debugging",
+    "errors": {
+        "fieldName": ["Specific field error message"]
+    }
+}
+```
+
+### Pagination Structure
+```json
+{
+    "pager": {
+        "totalItems": 100,
+        "currentPage": 1,
+        "pageSize": 10,
+        "totalPages": 10,
+        "startPage": 1,
+        "endPage": 10
+    },
+    "data": [] // Array of items
+}
+```
+
+## Integration Examples
+
+### Complete Message Sending Flow
+```javascript
+// 1. Authenticate
+const authResponse = await fetch('https://communicateapi.t2.sa/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        email: 'your@email.com',
+        password: 'yourpassword'
+    })
+});
+const { token } = await authResponse.json();
+
+// 2. Send message
+const messageResponse = await fetch('https://communicateapi.t2.sa/api/message/send-custom', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+        recipient: { id: "201276267641" },
+        message: { text: "Hello from T2 Communicate!" }
+    })
+});
+const messageResult = await messageResponse.json();
+
+// 3. Store messageId for status tracking
+const messageId = messageResult.messageId;
+```
+
+### Error Handling Example
+```javascript
+try {
+    const response = await sendMessage(messageData);
+    if (!response.ok) {
+        const error = await response.json();
+        console.error(`Error ${error.status}: ${error.detail}`);
+
+        // Handle specific errors
+        switch (error.status) {
+            case 401:
+                // Re-authenticate
+                await refreshToken();
+                break;
+            case 404:
+                // Contact not found
+                console.log('Contact does not exist');
+                break;
+            case 500:
+                // Server error - retry later
+                scheduleRetry(messageData);
+                break;
+        }
+    }
+} catch (error) {
+    console.error('Network error:', error);
+}
+```
+
+## Best Practices
+
+### 1. Authentication Management
+- Store tokens securely
+- Implement token refresh logic
+- Handle 401 responses by re-authenticating
+
+### 2. Rate Limiting
+- Implement exponential backoff for retries
+- Respect API rate limits
+- Queue messages during high volume
+
+### 3. Error Handling
+- Always check HTTP status codes
+- Parse error responses for detailed information
+- Implement appropriate retry logic
+
+### 4. Message Status Tracking
+- Store messageId from send responses
+- Implement callback endpoint for status updates
+- Handle duplicate status updates
+
+### 5. Media Handling
+- Validate file types and sizes before upload
+- Use appropriate MIME types
+- Ensure media URLs are publicly accessible
+
+### 6. Template Management
+- Sync templates regularly
+- Handle template approval workflows
+- Cache approved templates for better performance
+
+## Support and Troubleshooting
+
+### Common Issues
+1. **401 Unauthorized**: Check token validity and expiration
+2. **404 Not Found**: Verify contact/template existence
+3. **500 Server Error**: Check request format and retry
+4. **Template Issues**: Ensure templates are approved in WhatsApp Business
+
+### Debug Information
+Include the following in support requests:
+- Request/response headers
+- Full request body
+- Response traceId (when available)
+- Timestamp of the issue
+
+
+
+## ❓ FAQ
+
+### General Questions
+
+**Q: What is T2 Communicate?**
+A: T2 Communicate is a comprehensive WhatsApp Business API platform that enables businesses to integrate WhatsApp messaging capabilities into their applications and workflows.
+
+**Q: Do I need a WhatsApp Business account?**
+A: Yes, you need a verified WhatsApp Business account. T2 Communicate helps you set up and manage your WhatsApp Business API access.
+
+**Q: What are the pricing models?**
+A: We offer flexible pricing based on message volume. Contact our sales team for detailed pricing information.
+
+### Technical Questions
+
+**Q: What's the difference between template and session messages?**
+A: Template messages can be sent anytime and require WhatsApp approval. Session messages can only be sent within 24 hours of the last customer message and don't require pre-approval.
+
+**Q: How do I handle message failures?**
+A: Implement proper error handling and use webhook notifications to track message status. Failed messages will include error codes and descriptions.
+
+**Q: Can I send messages to international numbers?**
+A: Yes, T2 Communicate supports international messaging. Ensure phone numbers are in international format (+country_code).
+
+**Q: How do I test the integration?**
+A: Contact support for testing guidance and access. You can use webhook testing tools to simulate callback responses.
+
+### Troubleshooting
+
+**Q: Why am I getting 401 Unauthorized errors?**
+A: Check that your token is valid and not expired. Ensure you're including the Bearer prefix in the Authorization header.
+
+**Q: Messages are not being delivered. What should I check?**
+A: Verify the recipient's phone number format, check your WhatsApp Business account status, and ensure template messages are approved.
+
+**Q: How do I debug webhook issues?**
+A: Use webhook testing tools, check your endpoint logs, and verify your server responds with HTTP 200 within 30 seconds.
+
+---
+
+## 📞 Support & Contact
+
+### Technical Support
+- **Email**: h.magdy@t2.sa
+- **Response Time**: 24 hours (business days)
+- **Escalation**: For urgent issues, mark emails as "URGENT"
+
+### Documentation & Resources
+- **API Documentation**: https://t2communicate.docs.apiary.io/
+- **Interactive API Explorer**: https://communicateapi.t2.sa/swagger/index.html
+
+### Sales & Business Inquiries
+- **Email**: sales@t2.sa
+- **Website**: https://t2.sa
+
+---
+
+*© 2025 T2 Communicate. All rights reserved. This documentation is subject to change without notice.*

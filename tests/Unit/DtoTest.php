@@ -5,6 +5,7 @@ namespace Aghfatehi\Msegat\Tests\Unit;
 use Aghfatehi\Msegat\DTOs\BalanceResponse;
 use Aghfatehi\Msegat\DTOs\OtpResponse;
 use Aghfatehi\Msegat\DTOs\SmsResponse;
+use Aghfatehi\Msegat\DTOs\WhatsAppMessageResponse;
 use PHPUnit\Framework\TestCase;
 
 class DtoTest extends TestCase
@@ -66,5 +67,35 @@ class DtoTest extends TestCase
 
         $this->assertFalse($response->successful);
         $this->assertSame(0.0, $response->balance);
+    }
+
+    public function test_whatsapp_response_success(): void
+    {
+        $response = WhatsAppMessageResponse::fromApiResponse([
+            'id' => 'conv_001',
+            'messageId' => 'wa_msg_001',
+            'contactNumber' => '966512345678',
+            'status' => 'Sent',
+            'contactName' => 'Ahmed',
+        ]);
+
+        $this->assertTrue($response->successful);
+        $this->assertSame('wa_msg_001', $response->messageId);
+        $this->assertSame('conv_001', $response->conversationId);
+        $this->assertSame('966512345678', $response->contactNumber);
+        $this->assertSame('Sent', $response->status);
+        $this->assertSame('Ahmed', $response->contactName);
+    }
+
+    public function test_whatsapp_response_failed(): void
+    {
+        $response = WhatsAppMessageResponse::fromApiResponse([
+            'status' => 'Failed',
+            'message' => 'Contact not found',
+        ]);
+
+        $this->assertFalse($response->successful);
+        $this->assertSame('Failed', $response->status);
+        $this->assertSame('Contact not found', $response->message);
     }
 }
